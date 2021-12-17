@@ -1,142 +1,145 @@
-'use strict'
+/**
+ * renders progress to stdout
+ * @private 
+ * @param {Number} n - iterations completed
+ * @param {Number} total - total iterations to do
+ * @param {Number} elapsed - time taken so far in ms
+ * @param {Boolean} sameLine - render on the same line
+ */
+function _render(n, total, elapsed, sameLine) {
 
-function tqdm(){
-    
-	/**
-	 * renders progress to a string
-	 * @private 
-	 * @param {Number} n - iterations completed
-	 * @param {Number} total - total iterations to do
-	 * @param {Number} elapsed - time taken so fa in ms
-	 * @return {Object} ret - the combined object
-	 */
-	function _render(n, total, elapsed) {
+	const cent = Math.floor( n / total * 100 );
+	const est = ( 100 - ( cent + 0.000001 ) ) / ( cent + 0.0000001 ) * elapsed;
+	const ips = n / ( ( elapsed + 0.000001 ) / 1000 );
 
-		var cent = n/total*100;
-		var est = (100 - (cent+0.000001))/(cent+0.0000001) * elapsed;
-		var ips = n / ((elapsed+0.000001)/1000);
-		cent = Math.floor(cent);
+	let out = "|";
 
-		var out = "|";
-		for(let i = 0; i < 10; i++) {
-			if(i >= Math.round(cent/10)) {
-				out += "-";
-			} else {
-				out += "#";
-			}
-		}
-
-		out += "| " + n + "/" + total + " " + cent + "% [";
-
-		out += "elapsed: " + _formatter(elapsed) + " ";
-		out += "left: " + _formatter(est) + ", ";
-		out += ips.toFixed(2) + " iters/s]\n";
-
-		return out;
+	for (let i = 0; i < 10; i++) {
+		if(total)
+			out += i >= Math.round( cent / 10 ) ? "-" : "#";
+		else
+			out += (n - i) % 10 === 0 ? `/` : `-`;
 	}
 
+	out += `| ${n}`;
 
-	/**
-	 * Formats a time in ms to HH:MM:SS, or MM:SS if the time is less than an hour
-	 * @private 
-	 * @param {Number} msec
-	 * @return {string} out
-	 */
-	function _formatter(msec) {
+	if(total)
+		out += `/${total} ${cent}%`
 
-		var out = "";
-		var sec = Math.floor(msec / 1000);
-		var min = Math.floor(sec / 60);
-		var hour = Math.floor(min / 60);
-		sec = sec - min * 60;
-		min = min - hour * 60;
-		if(hour > 0) {
-			if(hour < 10) {
-				out = "0"
-			}
-			out = out + hour.toString() + ":";
-		}
-		if(min < 10) {
-			out = out + "0";
-		}
-		out = out + min.toString() +":";
-		if(sec < 10) {
-			out = out + "0";
-		}
-		out = out + sec.toString();
+	out += ` [`;
+	out += `elapsed: ${_formatter(elapsed)},`;
 
-		return out;
-	}
-		
-	/**
-	 * Adds a timed progress bar to iterables
-	 * @param {Iterable} iter
-	 * @param {Object} par - The optional parameters
-	 * @param {string} par.desc - A desciption string to add before the progress bar
-	 * @param {Number} par.total - The number of iterations to complete, needed for infinite iterables
-	 * @param {Number} par.minIter - The minimum number of iterations between progress bar updates
-	 * @param {Number} par.minInterval - The minimum amount of time between progress bar updates
-	 * @param {Boolean} par.logging - whether to output as a log, or update the same line
-	 */
-	return function* (iter, par) {
+	if(total)
+		out += ` left: ${_formatter(est)},`;
 
-		var def = {
-			desc:'',
-			minIter: 1,
-			minInterval: 500,
-			logging: false
-		};
+	out += ` ${ips.toFixed(2)} iters/s]\n`;
 
-		var params = {}
-		if(typeof def === 'object') {
-			for(let i in def) {
-				params[i] = def[i];
-			}
-		}
-		if(typeof par === 'object') {		
-			for(let i in par) {
-				params[i] = par[i];
-			}
-		}
-		var start = Date.now();
-		var now = start;
-		var n = 0; 
-		var lastn = 0;
-		var elapsed;
-		var lastElapsed  = 0;;
+	if(sameLine && n !== 0)
+		process.stdout.write("\u001b[1F\u001b[2K");
 
-		if(!("total" in params)) {
-			for (let i of iter) {
-				n++;
-			}
-			params["total"] = n;
-			n = 0;
-		}
-
-		console.log(params.desc);
-
-		// put an initial bar out
-		process.stdout.write(_render(0,params.total,0));
-
-		// iterations
-		for (let i of iter) {
-			yield i;
-			n++;
-			elapsed = Date.now() - start;
-			if(n - lastn >= params.minIter && elapsed - lastElapsed >= params.minInterval) {
-				if(params.logging) {
-					process.stdout.write("\u001b[1F\u001b[2K");
-				}
-				
-				lastn = n;
-				lastElapsed = elapsed;
-				process.stdout.write(_render(n, params.total, elapsed));
-			}
-			if(n > params.total) {
-				break;
-			}
-		}
-	}
+	process.stdout.write(out);
 }
 
-module.exports = tqdm();
+
+/**
+ * Formats a time in ms to HH:MM:SS, or MM:SS if the time is less than an hour
+ * @private 
+ * @param {Number} msec
+ * @return {string} out
+ */
+function _formatter(msec) {
+
+	let out = "";
+	let sec = Math.floor(msec / 1000);
+	let min = Math.floor(sec / 60);
+	let hour = Math.floor(min / 60);
+	
+	sec = sec - min * 60;
+	min = min - hour * 60;
+	
+	if(hour > 0) {
+		if(hour < 10) {
+			out = "0"
+		}
+		out = out + hour.toString() + ":";
+	}
+	
+	if(min < 10) {
+		out = out + "0";
+	}
+	
+	out = out + min.toString() +":";
+	
+	if(sec < 10) {
+		out = out + "0";
+	}
+	
+	out = out + sec.toString();
+
+	return out;
+}
+
+/**
+ * Adds a timed progress bar to iterables
+ * @param {Iterable} iter
+ * @param {Object} params - The optional parameters
+ * @param {Number} params.total - The number of iterations to complete, needed for infinite iterables
+ * @param {Number} params.minIter - The minimum number of iterations between progress bar updates
+ * @param {Number} params.minInterval - The minimum amount of time between progress bar updates
+ * @param {Boolean} params.sameLine - Output progress bars on new lines
+ * @param {Function} params.render - Render function to overwrite default one
+ */
+function tqdm (iter, {
+		minIter = 1,
+		minInterval = 500,
+		sameLine = true,
+		render = _render,
+		total = null
+	} = {}) {
+	
+	const start = Date.now();
+	const now = start;
+	let lastn = 0;
+	let lastElapsed  = 0;
+
+	total = iter.hasOwnProperty(`length`) ? iter.length : total;
+
+	// put an initial bar out
+	render(0, total, 0);
+
+	let n = 0;
+
+	const boundHandler = () => {
+		n++;
+		
+		const elapsed = Date.now() - start;
+		
+		if(n - lastn >= minIter && elapsed - lastElapsed >= minInterval) {			
+			lastn = n;
+			lastElapsed = elapsed;
+			render(n, total, elapsed, sameLine);
+		}
+		
+		return total == null || n < total;
+	}
+
+	const handledIterator = iter[Symbol.toStringTag] === `AsyncGenerator`
+		? async function*() {
+			for await (const i of iter) {
+				yield i;
+				if(!boundHandler())
+					return;
+			}
+		}
+		: function*() {
+			for (const i of iter) {
+				yield i;
+				if(!boundHandler())
+					return;
+			}
+		}
+
+	return handledIterator();
+}
+
+module.exports = tqdm;

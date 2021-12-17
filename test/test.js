@@ -1,19 +1,52 @@
-var assert = require('assert');
-var tdqm = require('../')();
+const assert = require('assert');
+const tqdm = require('../src/');
+const {
+	sleepFor,
+	range,
+	infiniteGenerator,
+	asyncInfiniteGenerator,
+	createMockRender
+} = require('./utils');
 
-describe('tqdm', function() {
-  it('prints a progress bar, for long running for..of loops', function(done) {
-    
-    function sleep( sleepDuration ){
-	var now = new Date().getTime();
-	while(new Date().getTime() < now + sleepDuration){ /* do nothing */ } 
+(async () => {
+	{
+		console.log('\x1b[36m%s\x1b[0m', "TEST CASE: array");
+		const mock = createMockRender();
+
+		for (const _ of tqdm(range(10), { render: mock.render })) {
+			await sleepFor(100);
+			assert(mock.context.n <= _, JSON.stringify([mock.context, _]));
+		}
+
+		assert(mock.context.elapsed >= 10 * 100, JSON.stringify([mock.context]));
+		assert(mock.context.total === 10, JSON.stringify([mock.context]));
+
+		console.log('\x1b[32m%s\x1b[0m', "\t Passed.");
 	}
+	{
+		console.log('\x1b[36m%s\x1b[0m', "TEST CASE: infinite generator");
+		const mock = createMockRender();
 
-	var t = [1,2,3,4,5,6,7,8,9,10];
-	for(var i of tdqm(t)) {
-		sleep(100);
+		for (const _ of tqdm(infiniteGenerator(), { render: mock.render, total: 10 })) {
+			await sleepFor(100);
+			assert(mock.context.n <= _, JSON.stringify([mock.context, _]));
+		}
+
+		assert(mock.context.elapsed >= 10 * 100, JSON.stringify([mock.context]));
+		assert(mock.context.total === 10, JSON.stringify([mock.context]));
+		console.log('\x1b[32m%s\x1b[0m', "\t Passed.");
 	}
+	{
+		console.log('\x1b[36m%s\x1b[0m', "TEST CASE: async infinite generator");
+		const mock = createMockRender();
 
-    done();
-  });
-});
+		for await (const _ of tqdm(asyncInfiniteGenerator(), { render: mock.render, total: 10 })) {
+			await sleepFor(100);
+			assert(mock.context.n <= _, JSON.stringify([mock.context, _]));
+		}
+
+		assert(mock.context.elapsed >= 10 * 100, JSON.stringify([mock.context]));
+		assert(mock.context.total === 10, JSON.stringify([mock.context]));
+		console.log('\x1b[32m%s\x1b[0m', "\t Passed.");
+	}
+})();
