@@ -1,4 +1,4 @@
-# ntqdm
+# tqdm
 
 tqdm for node
 
@@ -6,13 +6,13 @@ Wrap an iterable in tdqm, and it will render the progress bar to stdout as it it
 
 Installation:
 ```shell
-npm install ntqdm
+npm install tqdm
 ```
 
 
 Usage:
 ```javascript
-const tdqm = require(`ntqdm`);
+const tdqm = require(`tqdm`);
 
 const array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 for(let i of tdqm(array))

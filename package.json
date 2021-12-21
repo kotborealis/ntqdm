@@ -1,6 +1,6 @@
 {
-  "name": "ntqdm",
-  "version": "2.0.0",
+  "name": "tqdm",
+  "version": "2.0.3",
   "description": "tqdm for node",
   "main": "src/index.js",
   "scripts": {
@@ -8,17 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jhedin/ntqdm.git"
+    "url": "https://github.com/kotborealis/tqdm.git"
   },
   "keywords": [
-    "tqdm",
-    "ntqdm"
+    "tqdm"
   ],
   "author": "James Hedin <jhedin10@gmail.com>",
   "contributors": ["kotborealis <kotborealis@awooo.ru>"],
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jhedin/ntqdm/issues"
+    "url": "https://github.com/kotborealis/tqdm/issues"
   },
-  "homepage": "https://github.com/jhedin/ntqdm"
+  "homepage": "https://github.com/kotborealis/tqdm"
 }
