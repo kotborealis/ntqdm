@@ -2,7 +2,7 @@
 
 tqdm for node
 
-Wrap an iterable in tdqm, and it will render the progress bar to stdout as it iterates.
+Wrap an iterable in tqdm, and it will render the progress bar to stdout as it iterates.
 
 Installation:
 ```shell
@@ -12,34 +12,34 @@ npm install tqdm
 
 Usage:
 ```javascript
-const tdqm = require(`tqdm`);
+const tqdm = require(`tqdm`);
 
 const array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-for(let i of tdqm(array))
+for(let i of tqdm(array))
 	// long calculations...
 ```
 
 
-For infinite iterables, you need to specify a total number of iteations to complete. If no total is specified, tdqm will render
+For infinite iterables, you need to specify a total number of iteations to complete. If no total is specified, tqdm will render
 appropriate indefinite progress bar:
 
 ```javascript
-for(let i of tdqm(generator(), {total: 50}))
+for(let i of tqdm(generator(), {total: 50}))
 	// long calculations...
 ```
 
 This version also supports async generators:
 
 ```javascript
-for await (let i of tdqm(asyncGenerator(), {total: 50}))
+for await (let i of tqdm(asyncGenerator(), {total: 50}))
 	// long calculations...
 ```
 
-Normally, tdqm updates the same line, and assumes nothing else is written to stdout, you can set `sameLine` option to `false` to suppress
+Normally, tqdm updates the same line, and assumes nothing else is written to stdout, you can set `sameLine` option to `false` to suppress
 this behaviour:
 
 ```javascript
-for(let i of tdqm(generator(), {total: 50, sameLine: true})) {
+for(let i of tqdm(generator(), {total: 50, sameLine: true})) {
 	// long calculations...
 	console.log("Did something");
 }
