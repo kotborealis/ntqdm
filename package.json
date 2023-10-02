@@ -3,6 +3,7 @@
   "version": "2.0.3",
   "description": "tqdm for node",
   "main": "src/index.js",
+  "types": "index.d.ts",
   "scripts": {
    "test": "node test/test.js"
   },
