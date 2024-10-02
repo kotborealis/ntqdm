@@ -8,23 +8,27 @@
  */
 function _render(n, total, elapsed, sameLine) {
 
-	const cent = Math.floor( n / total * 100 );
-	const est = ( 100 - ( cent + 0.000001 ) ) / ( cent + 0.0000001 ) * elapsed;
-	const ips = n / ( ( elapsed + 0.000001 ) / 1000 );
+    const left = (total - n)
+    const ms_per_item = elapsed / n
+
+	const p =  n / total;
+	const est = left * ms_per_item;
+	const ips = 1000 /ms_per_item;
 
 	let out = "|";
 
-	for (let i = 0; i < 10; i++) {
+	for (let i = 1; i <= 10; i++) {
 		if(total)
-			out += i >= Math.round( cent / 10 ) ? "-" : "#";
+			out += (p >= i/10 ) ? "#" : "-";
 		else
+                        // print walking / if total isn't known
 			out += (n - i) % 10 === 0 ? `/` : `-`;
 	}
 
 	out += `| ${n}`;
 
 	if(total)
-		out += `/${total} ${cent}%`
+		out += `/${total} ${(p*100).toFixed(2)}%`
 
 	out += ` [`;
 	out += `elapsed: ${_formatter(elapsed)},`;
